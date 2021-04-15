@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoginService } from 'app/login/login.service';
 import { AccountService } from 'app/core/auth/account.service';
+import { AuthService } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'jhi-login',
@@ -24,7 +25,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private accountService: AccountService,
     private loginService: LoginService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private auth: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -32,6 +34,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.accountService.identity().subscribe(() => {
       if (this.accountService.isAuthenticated()) {
         this.router.navigate(['']);
+      }else {
+        this.auth.loginWithRedirect()
       }
     });
   }

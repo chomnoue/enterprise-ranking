@@ -14,7 +14,7 @@ export class PasswordComponent implements OnInit {
   doNotMatch = false;
   error = false;
   success = false;
-  account$?: Observable<Account | null>;
+  account$?: Observable<Account | null | undefined>;
   passwordForm = this.fb.group({
     currentPassword: ['', [Validators.required]],
     newPassword: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],

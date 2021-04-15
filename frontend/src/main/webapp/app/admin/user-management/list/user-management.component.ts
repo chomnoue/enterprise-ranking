@@ -16,7 +16,7 @@ import { UserManagementDeleteDialogComponent } from '../delete/user-management-d
   templateUrl: './user-management.component.html',
 })
 export class UserManagementComponent implements OnInit {
-  currentAccount: Account | null = null;
+  currentAccount: Account | null | undefined = null;
   users: User[] | null = null;
   isLoading = false;
   totalItems = 0;

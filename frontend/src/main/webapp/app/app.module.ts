@@ -28,6 +28,7 @@ import { FooterComponent } from './layouts/footer/footer.component';
 import { PageRibbonComponent } from './layouts/profiles/page-ribbon.component';
 import { ActiveMenuDirective } from './layouts/navbar/active-menu.directive';
 import { ErrorComponent } from './layouts/error/error.component';
+import { AuthModule } from '@auth0/auth0-angular';
 
 @NgModule({
   imports: [
@@ -51,6 +52,10 @@ import { ErrorComponent } from './layouts/error/error.component';
         provide: MissingTranslationHandler,
         useFactory: missingTranslationHandler,
       },
+    }),
+    AuthModule.forRoot({
+      domain: 'chomnoue.auth0.com',
+      clientId: 'KYU74QAJvasC48cqHb3CpI3NpGEcj1du'
     }),
   ],
   providers: [

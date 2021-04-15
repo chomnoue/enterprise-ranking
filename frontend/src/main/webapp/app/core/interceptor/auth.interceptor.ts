@@ -4,13 +4,16 @@ import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
 
 import { ApplicationConfigService } from '../config/application-config.service';
+import { mergeMap, map } from 'rxjs/operators';
+import {AuthService} from '@auth0/auth0-angular';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   constructor(
     private localStorage: LocalStorageService,
     private sessionStorage: SessionStorageService,
-    private applicationConfigService: ApplicationConfigService
+    private applicationConfigService: ApplicationConfigService,
+    private auth: AuthService
   ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -19,14 +22,17 @@ export class AuthInterceptor implements HttpInterceptor {
       return next.handle(request);
     }
 
-    const token: string | null = this.localStorage.retrieve('authenticationToken') ?? this.sessionStorage.retrieve('authenticationToken');
-    if (token) {
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-    }
-    return next.handle(request);
+    //const token: string | null = this.localStorage.retrieve('authenticationToken') ??
+    // this.sessionStorage.retrieve('authenticationToken');
+    return this.auth.getAccessTokenSilently().pipe(mergeMap(token=> {
+      if (token) {
+        request = request.clone({
+          setHeaders: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+      return next.handle(request);
+    }));
   }
 }

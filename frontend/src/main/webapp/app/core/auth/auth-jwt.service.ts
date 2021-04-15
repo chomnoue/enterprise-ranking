@@ -1,15 +1,16 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { LocalStorageService, SessionStorageService } from 'ngx-webstorage';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {LocalStorageService, SessionStorageService} from 'ngx-webstorage';
 
-import { ApplicationConfigService } from '../config/application-config.service';
-import { Login } from 'app/login/login.model';
+import {ApplicationConfigService} from '../config/application-config.service';
+import {Login} from 'app/login/login.model';
 
 type JwtToken = {
   id_token: string;
 };
+
 
 @Injectable({ providedIn: 'root' })
 export class AuthServerProvider {

@@ -51,7 +51,7 @@ export class SettingsComponent implements OnInit {
 
       this.accountService.authenticate(this.account);
 
-      if (this.account.langKey !== this.translateService.currentLang) {
+      if (this.account.langKey && this.account.langKey !== this.translateService.currentLang) {
         this.translateService.use(this.account.langKey);
       }
     });
