@@ -71,7 +71,7 @@ export class AccountService {
         tap((account: Account | null | undefined) => {
           this.authenticate(account);
 
-          // After retrieve the account info, the language will be changed to
+          // After retrieve the account info the language will be changed to
           // the user's preferred language configured in the account setting
           if (account?.langKey) {
             const langKey = this.sessionStorage.retrieve('locale') ?? account.langKey;

@@ -1,0 +1,19 @@
+entity Company {
+	id String,
+    country String required,
+    industry String required,
+    description String required
+}
+
+
+entity Review {
+	id String,
+	companyId String required,
+    comment String,
+    score Integer min(1) max(5) required,
+}
+
+// Set pagination options
+paginate Company, Review with pagination
+
+

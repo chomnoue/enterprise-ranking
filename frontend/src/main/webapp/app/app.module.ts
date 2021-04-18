@@ -55,7 +55,12 @@ import { AuthModule } from '@auth0/auth0-angular';
     }),
     AuthModule.forRoot({
       domain: 'chomnoue.auth0.com',
-      clientId: 'KYU74QAJvasC48cqHb3CpI3NpGEcj1du'
+      clientId: 'KYU74QAJvasC48cqHb3CpI3NpGEcj1du',
+      responseType: 'token id_token',
+      audience: 'https://chomnoue.auth0.com/api/v2/',
+
+      // Request this scope at user authentication time
+      scope: 'read:current_user'
     }),
   ],
   providers: [

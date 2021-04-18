@@ -1,0 +1,90 @@
+<div class="row justify-content-center">
+  <div class="col-8">
+    <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2 id="jhi-review-heading" data-cy="ReviewCreateUpdateHeading" jhiTranslate="enterpriseRankingApp.review.home.createOrEditLabel">
+        Create or edit a Review
+      </h2>
+
+      <div>
+        <jhi-alert-error></jhi-alert-error>
+
+        <div class="form-group">
+          <label class="form-control-label" jhiTranslate="enterpriseRankingApp.review.id" for="field_id">Id</label>
+          <input
+            type="text"
+            class="form-control"
+            name="id"
+            id="field_id"
+            data-cy="id"
+            formControlName="id"
+            [readonly]="editForm.get('id')!.value != null"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-control-label" jhiTranslate="enterpriseRankingApp.review.companyId" for="field_companyId">Company Id</label>
+          <input type="text" class="form-control" name="companyId" id="field_companyId" data-cy="companyId" formControlName="companyId" />
+          <div *ngIf="editForm.get('companyId')!.invalid && (editForm.get('companyId')!.dirty || editForm.get('companyId')!.touched)">
+            <small
+              class="form-text text-danger"
+              *ngIf="editForm.get('companyId')?.errors?.required"
+              jhiTranslate="entity.validation.required"
+            >
+              This field is required.
+            </small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-control-label" jhiTranslate="enterpriseRankingApp.review.comment" for="field_comment">Comment</label>
+          <input type="text" class="form-control" name="comment" id="field_comment" data-cy="comment" formControlName="comment" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-control-label" jhiTranslate="enterpriseRankingApp.review.score" for="field_score">Score</label>
+          <input type="number" class="form-control" name="score" id="field_score" data-cy="score" formControlName="score" />
+          <div *ngIf="editForm.get('score')!.invalid && (editForm.get('score')!.dirty || editForm.get('score')!.touched)">
+            <small class="form-text text-danger" *ngIf="editForm.get('score')?.errors?.required" jhiTranslate="entity.validation.required">
+              This field is required.
+            </small>
+            <small
+              class="form-text text-danger"
+              *ngIf="editForm.get('score')?.errors?.min"
+              jhiTranslate="entity.validation.min"
+              [translateValues]="{ min: 1 }"
+            >
+              This field should be at least 1.
+            </small>
+            <small
+              class="form-text text-danger"
+              *ngIf="editForm.get('score')?.errors?.max"
+              jhiTranslate="entity.validation.max"
+              [translateValues]="{ max: 5 }"
+            >
+              This field cannot be more than 5.
+            </small>
+            <small class="form-text text-danger" [hidden]="!editForm.get('score')?.errors?.number" jhiTranslate="entity.validation.number">
+              This field should be a number.
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
