@@ -1,13 +1,13 @@
 import 'source-map-support/register'
 
-import CreateTodoRequest from '../../requests/CreateTodoRequest'
+import CreateTodoRequest from '../../requests/ReviewRequest'
 import {formatJSONResponse, getUserId, ValidatedEventAPIGatewayHandler} from "../../utils/apiGateway";
-import {createTodo} from "../../businessLogic/todos"
+import {createCompany} from "../../businessLogic/companies"
 import {middyfy} from "../../utils/lambda";
 import type {APIGatewayProxyResult} from "aws-lambda";
 
 const createTodoHandler: ValidatedEventAPIGatewayHandler<typeof CreateTodoRequest> = async (event): Promise<APIGatewayProxyResult> => {
-  const item = await createTodo(getUserId(event), event.body)
+  const item = await createCompany(getUserId(event), event.body)
   return formatJSONResponse({item})
 }
 

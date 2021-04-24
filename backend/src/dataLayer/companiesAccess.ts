@@ -31,6 +31,31 @@ export class CompanyAccess {
     }).promise();
   }
 
+  async updateVotes(companyId: string, count: number, score: number) {
+    await this.docClient.update({
+      TableName: this.companiesTable,
+      Key: {companyId},
+      UpdateExpression: "set votesCount = votesCount + :count, totalScore = totalScore + :score",
+      ExpressionAttributeValues: {
+        ":count": count,
+        ":score": score
+      },
+      ReturnValues: "UPDATED_NEW"
+    }).promise();
+  }
+
+  async addImage(companyId: string, key: string) {
+    await this.docClient.update({
+      TableName: this.companiesTable,
+      Key: {companyId},
+      UpdateExpression: "add images :keys",
+      ExpressionAttributeValues: {
+        ":keys": [key]
+      },
+      ReturnValues: "UPDATED_NEW"
+    }).promise();
+  }
+
   async deleteCompany(companyId: string) {
     await this.docClient.delete({
       TableName: this.companiesTable,
@@ -45,6 +70,5 @@ export class CompanyAccess {
     }).promise()
     return result.Item as CompanyItem;
   }
-
 
 }

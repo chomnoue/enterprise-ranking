@@ -1,9 +1,7 @@
 export interface ReviewItem {
   companyId: string
-  country: string;
-  industry: string;
-  description: string;
+  userId: string
+  review: string
+  score: number
   createdAt: string
-  createdBy: string
-  attachmentUrls?: string []
 }

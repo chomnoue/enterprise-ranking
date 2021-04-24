@@ -1,67 +1,70 @@
 import {DocumentClient} from 'aws-sdk/clients/dynamodb'
 import {XAWS} from "./aws";
-import {CompanyItem} from "../models/CompanyItem";
-import {Sort} from "../models/Sort";
-import {Next} from "../models/Next";
+import {NextReview} from "../models/Next";
+import {ReviewItem} from "../models/ReviewItem";
 
 
-export class CompanyAccess {
+export class ReviewAccess {
 
   constructor(
       private readonly docClient: DocumentClient = new XAWS.DynamoDB.DocumentClient(),
-      private readonly companiesTable = process.env.COMPANIES_TABLE,
-      private readonly creationDateIndex = process.env.TODOS_CREATION_DATE_INDEX,
-      private readonly dueDateIndex = process.env.TODOS_DUE_DATE_INDEX
+      private readonly reviewsTable = process.env.REVIEWS_TABLE,
+      private readonly creationDateIndex = process.env.REVIEWS_CREATION_DATE_INDEX
   ) {
   }
 
-  async getTodos(userId: string, sort: Sort, next?: Next, limit?: number): Promise<{ items: CompanyItem[], next: Next }> {
-    const nextKey = next ? {userId, todoId: next.todoId} : undefined
-    if (nextKey) {
-      nextKey[sort] = next.sortKey
-    }
+  async getReview(companyId: string, userId: string): Promise<ReviewItem> {
+    const result = await this.docClient.get({
+      TableName: this.reviewsTable,
+      Key: {companyId, userId}
+    }).promise();
+    return result.Item as ReviewItem
+  }
+
+  async getReviews(companyId: string, next?: NextReview, limit?: number): Promise<{ items: ReviewItem[], next: NextReview }> {
+    const nextKey = next ? {companyId, ...next} : undefined
     const result = await this.docClient.query({
-      TableName: this.todosTable,
-      IndexName: sort === 'createdAt' ? this.creationDateIndex : this.dueDateIndex,
-      KeyConditionExpression: 'userId = :userId',
+      TableName: this.reviewsTable,
+      IndexName: this.creationDateIndex,
+      KeyConditionExpression: 'companyId = :companyId',
       ExpressionAttributeValues: {
-        ':userId': userId
+        ':companyId': companyId
       },
       ExclusiveStartKey: nextKey,
       Limit: limit
     }).promise()
-    const items = result.Items as CompanyItem[] || []
-    const newNext: Next = result.LastEvaluatedKey? {
-      todoId: result.LastEvaluatedKey.todoId,
-      sortKey: result.LastEvaluatedKey[sort]
-    }: undefined
+    const items = result.Items as ReviewItem[] || []
+    const newNext: NextReview = result.LastEvaluatedKey ? {
+      userId: result.LastEvaluatedKey.userId,
+      createdAt: result.LastEvaluatedKey.createdAt
+    } : undefined
     return {items, next: newNext}
   }
 
-  async createTodo(todoItem: CompanyItem) {
+  async createReview(reviewItem: ReviewItem) {
     await this.docClient.put({
-      TableName: this.todosTable,
-      Item: todoItem
+      TableName: this.reviewsTable,
+      Item: reviewItem
     }).promise()
   }
 
-  async updateTodo(userId: string, todoId: string, newValues: { [key: string]: any }) {
+  async updateReview(companyId: string, userId: string, newValues: { [key: string]: any }) {
     const attributesUpdates = {}
     for (let key in newValues) {
       attributesUpdates[key] = {Action: "PUT", Value: newValues[key]}
     }
     await this.docClient.update({
-      TableName: this.todosTable,
-      Key: {userId, todoId},
+      TableName: this.reviewsTable,
+      Key: {companyId, userId},
       AttributeUpdates: attributesUpdates,
-      ReturnValues:"UPDATED_NEW"
+      ReturnValues: "UPDATED_NEW"
     }).promise();
   }
 
-  async deleteTodo(userId: string, todoId: string) {
+  async deleteReview(companyId: string, userId: string) {
     await this.docClient.delete({
-      TableName: this.todosTable,
-      Key: {userId, todoId}
+      TableName: this.reviewsTable,
+      Key: {companyId, userId}
     }).promise();
   }
 }

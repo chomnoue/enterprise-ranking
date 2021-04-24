@@ -1,5 +1,6 @@
 import {XAWS} from "./aws";
-
+import * as uuid from 'uuid'
+import {Urls} from "../models/Urls";
 
 export class FileAccess {
 
@@ -13,8 +14,12 @@ export class FileAccess {
     return this.getSignedUrl('getObject', key)
   }
 
-  getPutSignedUrl(key: string): string {
-    return this.getSignedUrl('putObject', key)
+  getPutSignedUrl(companyId: string): Urls {
+    const key = companyId + "/" + uuid.v4()
+    return {
+      put: this.getSignedUrl('putObject', key),
+      get: this.getGetSignedUrl(key)
+    }
   }
 
   private getSignedUrl(action: string, key: string) {

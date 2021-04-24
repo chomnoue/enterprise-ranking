@@ -2,7 +2,7 @@ import 'source-map-support/register'
 
 import {APIGatewayProxyResult} from 'aws-lambda'
 import {formatJSONResponse, getUserId, ValidatedEventAPIGatewayHandler} from "../../utils/apiGateway";
-import {generateUploadUrl} from "../../businessLogic/todos";
+import {generateUploadUrl} from "../../businessLogic/companies";
 import {middyfy} from "../../utils/lambda";
 
 const generateUpdateUrlHandler: ValidatedEventAPIGatewayHandler<any> = async (event): Promise<APIGatewayProxyResult> => {
