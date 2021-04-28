@@ -38,8 +38,18 @@ functions:
           authorizer: Auth
     role: GetCompaniesRole
 
-  CreateTodo:
-    handler: src/lambda/http/createTodo.handler
+  GetCompany:
+    handler: src/lambda/http/getCompany.handler
+    events:
+      - http:
+          method: get
+          path: companies/{companyId}
+          cors: true
+          authorizer: Auth
+    role: GetCompanyRole
+
+  CreateCompany:
+    handler: src/lambda/http/createCompany.handler
     events:
       - http:
           method: post
@@ -48,41 +58,121 @@ functions:
           authorizer: Auth
           request:
             schemas:
-              application/json: ${file(create_company.json)}
-    role: CreateTodoRole
+              application/json: ${file(requests/create_company.json)}
+    role: CreateCompanyRole
 
-  UpdateTodo:
-    handler: src/lambda/http/updateTodo.handler
+  UpdateCompany:
+    handler: src/lambda/http/updateCompany.handler
     events:
       - http:
           method: patch
-          path: companies/{todoId}
+          path: companies/{companyId}
           cors: true
           authorizer: Auth
           request:
             schemas:
-              application/json: ${file(update_company.json)}
-    role: UpdateTodoRole
+              application/json: ${file(requests/update_company.json)}
+    role: UpdateCompanyRole
 
-  DeleteTodo:
-    handler: src/lambda/http/deleteTodo.handler
+  DeleteCompany:
+    handler: src/lambda/http/deleteCompany.handler
     events:
       - http:
           method: delete
-          path: companies/{todoId}
+          path: companies/{companyId}
           cors: true
           authorizer: Auth
-    role: DeleteTodoRole
+    role: DeleteCompanyRole
 
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
     events:
       - http:
           method: post
-          path: companies/{todoId}/attachment
+          path: companies/{companyId}/attachment
           cors: true
           authorizer: Auth
     role: GenerateUploadUrlRole
+
+  GetReviews:
+    handler: src/lambda/http/getReviews.handler
+    events:
+      - http:
+          method: get
+          path: companies/{companyId}/reviews
+          cors: true
+          authorizer: Auth
+    role: GetReviewsRole
+
+  GetReview:
+    handler: src/lambda/http/getReview.handler
+    events:
+      - http:
+          method: get
+          path: companies/{companyId}/review
+          cors: true
+          authorizer: Auth
+    role: GetReviewRole
+
+  CreateReview:
+    handler: src/lambda/http/createReview.handler
+    events:
+      - http:
+          method: post
+          path: companies/{companyId}/reviews
+          cors: true
+          authorizer: Auth
+          request:
+            schemas:
+              application/json: ${file(requests/review.json)}
+    role: CreateReviewRole
+
+  UpdateReview:
+    handler: src/lambda/http/updateReview.handler
+    events:
+      - http:
+          method: patch
+          path: companies/{companyId}/review
+          cors: true
+          authorizer: Auth
+          request:
+            schemas:
+              application/json: ${file(requests/review.json)}
+    role: UpdateReviewRole
+
+  DeleteReview:
+    handler: src/lambda/http/deleteReview.handler
+    events:
+      - http:
+          method: delete
+          path: companies/{companyId}/review
+          cors: true
+          authorizer: Auth
+    role: DeleteReviewRole
+
+  SyncCompaniesWithElasticsearch:
+    environment:
+      ES_ENDPOINT: !GetAtt CompaniesSearch.DomainEndpoint
+    handler: src/lambda/dynamoDb/elasticSearchSync.handler
+    events:
+      - stream:
+          type: dynamodb
+          arn: !GetAtt CompaniesDynamoDBTable.StreamArn
+    role: CompaniesSearchSyncRole
+
+  AddImageToCompany:
+    handler: src/lambda/s3/addImageToCompany.handler
+    events:
+      - sns:
+          arn:
+            Fn::Join:
+              - ':'
+              - - arn:aws:sns
+                - Ref: AWS::Region
+                - Ref: AWS::AccountId
+                - ${self:custom.topicName}
+          topicName: ${self:custom.topicName}
+    role: CompaniesImagesSyncRole
 
 resources:
   Resources:
@@ -459,4 +549,3 @@ resources:
                 AWS: '*'
               Action: 'es:*'
               Resource: '*'
-
