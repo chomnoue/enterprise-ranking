@@ -1,4 +1,4 @@
-service: serverless-todo-app
+service: companies-ranking-app
 variablesResolutionMode: 20210219
 configValidationMode: error
 plugins:
@@ -16,37 +16,39 @@ provider:
   region: ${opt:region, 'us-east-1'}
   environment:
     JWKS_URL: ${opt:jwksUrl, 'https://chomnoue.auth0.com/.well-known/jwks.json'}
-    TODOS_TABLE: Todos-${self:provider.stage}
-    TODOS_CREATION_DATE_INDEX: CreatedAtIndex
-    TODOS_DUE_DATE_INDEX: DueDateIndex
-    ATTACHMENTS_BUCKET: chomnoue-serverless-todos-attachments-${self:provider.stage}
+    COMPANIES_TABLE: Companies-${self:provider.stage}
+    REVIEWS_TABLE: Reviews-${self:provider.stage}
+    REVIEWS_CREATION_DATE_INDEX: CreatedAtIndex
+    ATTACHMENTS_BUCKET: chomnoue-companies-ranking-attachments-${self:provider.stage}
+custom:
+  topicName: attachmentsTopic-${self:provider.stage}
 
 functions:
 
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  GetTodos:
-    handler: src/lambda/http/getTodos.handler
+  GetCompanies:
+    handler: src/lambda/http/getCompanies.handler
     events:
       - http:
           method: get
-          path: todos
+          path: companies
           cors: true
           authorizer: Auth
-    role: GetTodosRole
+    role: GetCompaniesRole
 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
     events:
       - http:
           method: post
-          path: todos
+          path: companies
           cors: true
           authorizer: Auth
           request:
             schemas:
-              application/json: ${file(create_todo_request.json)}
+              application/json: ${file(create_company.json)}
     role: CreateTodoRole
 
   UpdateTodo:
@@ -54,12 +56,12 @@ functions:
     events:
       - http:
           method: patch
-          path: todos/{todoId}
+          path: companies/{todoId}
           cors: true
           authorizer: Auth
           request:
             schemas:
-              application/json: ${file(update_todo_request.json)}
+              application/json: ${file(update_company.json)}
     role: UpdateTodoRole
 
   DeleteTodo:
@@ -67,7 +69,7 @@ functions:
     events:
       - http:
           method: delete
-          path: todos/{todoId}
+          path: companies/{todoId}
           cors: true
           authorizer: Auth
     role: DeleteTodoRole
@@ -77,7 +79,7 @@ functions:
     events:
       - http:
           method: post
-          path: todos/{todoId}/attachment
+          path: companies/{todoId}/attachment
           cors: true
           authorizer: Auth
     role: GenerateUploadUrlRole
@@ -95,39 +97,41 @@ resources:
         RestApiId:
           Ref: ApiGatewayRestApi
 
-    TodosDynamoDBTable:
+    CompaniesDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
         AttributeDefinitions:
-          - AttributeName: todoId
+          - AttributeName: companyId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: companyId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.COMPANIES_TABLE}
+
+    ReviewsDynamoDBTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: companyId
             AttributeType: S
           - AttributeName: userId
             AttributeType: S
           - AttributeName: createdAt
             AttributeType: S
-          - AttributeName: dueDate
-            AttributeType: S
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: companyId
             KeyType: HASH
-          - AttributeName: todoId
+          - AttributeName: userId
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.TODOS_TABLE}
+        TableName: ${self:provider.environment.REVIEWS_TABLE}
         GlobalSecondaryIndexes:
-          - IndexName: ${self:provider.environment.TODOS_CREATION_DATE_INDEX}
+          - IndexName: ${self:provider.environment.REVIEWS_CREATION_DATE_INDEX}
             KeySchema:
-              - AttributeName: userId
+              - AttributeName: companyId
                 KeyType: HASH
               - AttributeName: createdAt
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-          - IndexName: ${self:provider.environment.TODOS_DUE_DATE_INDEX}
-            KeySchema:
-              - AttributeName: userId
-                KeyType: HASH
-              - AttributeName: dueDate
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
@@ -151,7 +155,31 @@ resources:
                 - HEAD
               MaxAge: 3000
 
-    GetTodosRole:
+    SNSTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                AWS: "*"
+              Action: sns:Publish
+              Resource:
+                !Ref AttachmentsTopic
+              Condition:
+                ArnLike:
+                  AWS:SourceArn: arn:aws:s3:::${self:provider.environment.ATTACHMENTS_BUCKET}
+        Topics:
+          - !Ref AttachmentsTopic
+
+    AttachmentsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: attachment bucket topic
+        TopicName: ${self:custom.topicName}
+
+    GetCompaniesRole:
       Type: AWS::IAM::Role
       Properties:
         AssumeRolePolicyDocument: &assumeRolePolicyDocument
@@ -163,7 +191,7 @@ resources:
                   - lambda.amazonaws.com
               Action: sts:AssumeRole
         Policies:
-          - PolicyName: getTodosPolicy
+          - PolicyName: getCompaniesPolicy
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
@@ -190,21 +218,35 @@ resources:
                     - "*"
                 - Effect: Allow
                   Action:
-                    - dynamodb:Query
-                  Resource:
-                    - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_CREATION_DATE_INDEX}
-                    - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_DUE_DATE_INDEX}
+                    - s3:GetObject
+                  Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENTS_BUCKET}/*
+
+    GetCompanyRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument: *assumeRolePolicyDocument
+        Policies:
+          - PolicyName: getCompanyPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - *logsStatement
+                - *xrayStatement
+                - Effect: Allow
+                  Action:
+                    - dynamodb:GetItem
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
                 - Effect: Allow
                   Action:
                     - s3:GetObject
                   Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENTS_BUCKET}/*
 
-    CreateTodoRole:
+    CreateCompanyRole:
       Type: AWS::IAM::Role
       Properties:
         AssumeRolePolicyDocument: *assumeRolePolicyDocument
         Policies:
-          - PolicyName: createTodoPolicy
+          - PolicyName: createCompanyPolicy
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
@@ -213,18 +255,14 @@ resources:
                 - Effect: Allow
                   Action:
                     - dynamodb:PutItem
-                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-                - Effect: Allow
-                  Action:
-                    - s3:GetObject
-                  Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENTS_BUCKET}/*
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
 
-    UpdateTodoRole:
+    UpdateCompanyRole:
       Type: AWS::IAM::Role
       Properties:
         AssumeRolePolicyDocument: *assumeRolePolicyDocument
         Policies:
-          - PolicyName: updateTodoPolicy
+          - PolicyName: updateCompanyPolicy
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
@@ -233,14 +271,14 @@ resources:
                 - Effect: Allow
                   Action:
                     - dynamodb:UpdateItem
-                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
 
-    DeleteTodoRole:
+    DeleteCompanyRole:
       Type: AWS::IAM::Role
       Properties:
         AssumeRolePolicyDocument: *assumeRolePolicyDocument
         Policies:
-          - PolicyName: deleteTodoPolicy
+          - PolicyName: deleteCompanyPolicy
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
@@ -249,7 +287,7 @@ resources:
                 - Effect: Allow
                   Action:
                     - dynamodb:DeleteItem
-                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
 
     GenerateUploadUrlRole:
       Type: AWS::IAM::Role
@@ -265,4 +303,160 @@ resources:
                 - Effect: Allow
                   Action:
                     - s3:PutObject
+                    - s3:GetObject
                   Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENTS_BUCKET}/*
+
+    GetReviewsRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument: *assumeRolePolicyDocument
+        Policies:
+          - PolicyName: getReviewsPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - *logsStatement
+                - *xrayStatement
+                - Effect: Allow
+                  Action:
+                    - dynamodb:Query
+                  Resource:
+                    - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.REVIEWS_TABLE}/index/${self:provider.environment.REVIEWS_CREATION_DATE_INDEX}
+
+    GetReviewRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument: *assumeRolePolicyDocument
+        Policies:
+          - PolicyName: getReviewPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - *logsStatement
+                - *xrayStatement
+                - Effect: Allow
+                  Action:
+                    - dynamodb:GetItem
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.REVIEWS_TABLE}
+
+    CreateReviewRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument: *assumeRolePolicyDocument
+        Policies:
+          - PolicyName: createReviewPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - *logsStatement
+                - *xrayStatement
+                - Effect: Allow
+                  Action:
+                    - dynamodb:PutItem
+                    - dynamodb:GetItem
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.REVIEWS_TABLE}
+                - Effect: Allow
+                  Action:
+                    - dynamodb:UpdateItem
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
+
+    UpdateReviewRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument: *assumeRolePolicyDocument
+        Policies:
+          - PolicyName: updateReviewPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - *logsStatement
+                - *xrayStatement
+                - Effect: Allow
+                  Action:
+                    - dynamodb:UpdateItem
+                    - dynamodb:GetItem
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.REVIEWS_TABLE}
+                - Effect: Allow
+                  Action:
+                    - dynamodb:UpdateItem
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
+
+    DeleteReviewRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument: *assumeRolePolicyDocument
+        Policies:
+          - PolicyName: deleteReviewPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - *logsStatement
+                - *xrayStatement
+                - Effect: Allow
+                  Action:
+                    - dynamodb:DeleteItem
+                    - dynamodb:GetItem
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.REVIEWS_TABLE}
+                - Effect: Allow
+                  Action:
+                    - dynamodb:UpdateItem
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
+
+    CompaniesSearchSyncRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument: *assumeRolePolicyDocument
+        Policies:
+          - PolicyName: companiesSearchSyncPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - *logsStatement
+                - *xrayStatement
+                - Effect: Allow
+                  Action:
+                    - dynamodb:UpdateItem
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
+
+    CompaniesImagesSyncRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument: *assumeRolePolicyDocument
+        Policies:
+          - PolicyName: companiesImageSyncPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - *logsStatement
+                - *xrayStatement
+                - Effect: Allow
+                  Action:
+                    - dynamodb:UpdateItem
+                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
+
+    CompaniesSearch:
+      Type: AWS::Elasticsearch::Domain
+      Properties:
+        ElasticsearchVersion: '6.3'
+        DomainName: companies-search-${self:provider.stage}
+        ElasticsearchClusterConfig:
+          DedicatedMasterEnabled: false
+          InstanceCount: '1'
+          ZoneAwarenessEnabled: false
+          InstanceType: t2.small.elasticsearch
+        EBSOptions:
+          EBSEnabled: true
+          Iops: 0
+          VolumeSize: 10
+          VolumeType: 'gp2'
+
+        AccessPolicies:
+          Version: '2012-10-17'
+          Statement:
+            -
+              Effect: Allow
+              Principal:
+                AWS: '*'
+              Action: 'es:*'
+              Resource: '*'
+

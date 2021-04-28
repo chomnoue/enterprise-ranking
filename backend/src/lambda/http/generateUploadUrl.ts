@@ -1,13 +1,13 @@
 import 'source-map-support/register'
 
 import {APIGatewayProxyResult} from 'aws-lambda'
-import {formatJSONResponse, getUserId, ValidatedEventAPIGatewayHandler} from "../../utils/apiGateway";
+import {formatJSONResponse, ValidatedEventAPIGatewayHandler} from "../../utils/apiGateway";
 import {generateUploadUrl} from "../../businessLogic/companies";
 import {middyfy} from "../../utils/lambda";
 
-const generateUpdateUrlHandler: ValidatedEventAPIGatewayHandler<any> = async (event): Promise<APIGatewayProxyResult> => {
-  const uploadUrl = await generateUploadUrl(getUserId(event), event.pathParameters.todoId)
-  return formatJSONResponse({uploadUrl})
+const generateUploadUrlHandler: ValidatedEventAPIGatewayHandler<any> = async (event): Promise<APIGatewayProxyResult> => {
+  const uploadUrls = await generateUploadUrl(event.pathParameters.todoId)
+  return formatJSONResponse(uploadUrls)
 }
 
-export const handler = middyfy(generateUpdateUrlHandler)
+export const handler = middyfy(generateUploadUrlHandler)

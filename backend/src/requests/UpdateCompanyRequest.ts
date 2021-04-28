@@ -5,5 +5,5 @@ export default {
     country: { type: 'string' },
     industry: { type: 'string' },
     description: { type: 'string' }
-  },
+  }
 } as const;
