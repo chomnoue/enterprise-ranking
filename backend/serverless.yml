@@ -157,7 +157,8 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn: !GetAtt CompaniesDynamoDBTable.StreamArn
+          arn:
+            Fn::GetAtt: [CompaniesDynamoDBTable, StreamArn]
     role: CompaniesSearchSyncRole
 
   AddImageToCompany:
@@ -198,6 +199,8 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.COMPANIES_TABLE}
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
 
     ReviewsDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
@@ -507,6 +510,15 @@ resources:
                   Action:
                     - dynamodb:UpdateItem
                   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
+                - Effect: Allow
+                  Action:
+                    - dynamodb:GetRecords
+                    - dynamodb:GetShardIterator
+                    - dynamodb:DescribeStream
+                    - dynamodb:ListShards
+                    - dynamodb:ListStreams
+                  Resource:
+                    Fn::GetAtt: [CompaniesDynamoDBTable, StreamArn]
 
     CompaniesImagesSyncRole:
       Type: AWS::IAM::Role
@@ -543,9 +555,20 @@ resources:
         AccessPolicies:
           Version: '2012-10-17'
           Statement:
-            -
-              Effect: Allow
+            - Effect: Allow
               Principal:
-                AWS: '*'
+                AWS: !GetAtt CompaniesSearchSyncRole.Arn
               Action: 'es:*'
-              Resource: '*'
+              Resource: &companiesSearchResource
+                - 'Fn::Join':
+                    - ':'
+                    -
+                      - 'arn:aws:es'
+                      - Ref: 'AWS::Region'
+                      - Ref: 'AWS::AccountId'
+                      - 'domain/companies-search-${self:provider.stage}/*'
+            - Effect: Allow
+              Principal:
+                AWS: !GetAtt GetCompaniesRole.Arn
+              Action: 'es:*'
+              Resource: *companiesSearchResource
