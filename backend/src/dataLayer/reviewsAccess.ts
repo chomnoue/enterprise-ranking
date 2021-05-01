@@ -21,7 +21,7 @@ export class ReviewAccess {
     return result.Item as ReviewItem
   }
 
-  async getReviews(companyId: string, next?: NextReview, limit?: number): Promise<{ items: ReviewItem[], next: NextReview }> {
+  async getReviews(companyId: string, next?: NextReview, limit?: number): Promise<ReviewItem[]> {
     const nextKey = next ? {companyId, ...next} : undefined
     const result = await this.docClient.query({
       TableName: this.reviewsTable,
@@ -33,12 +33,7 @@ export class ReviewAccess {
       ExclusiveStartKey: nextKey,
       Limit: limit
     }).promise()
-    const items = result.Items as ReviewItem[] || []
-    const newNext: NextReview = result.LastEvaluatedKey ? {
-      userId: result.LastEvaluatedKey.userId,
-      createdAt: result.LastEvaluatedKey.createdAt
-    } : undefined
-    return {items, next: newNext}
+    return result.Items as ReviewItem[] || []
   }
 
   async createReview(reviewItem: ReviewItem) {

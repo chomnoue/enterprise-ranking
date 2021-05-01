@@ -12,19 +12,19 @@ export class ReviewRoutingResolveService implements Resolve<IReview> {
   constructor(protected service: ReviewService, protected router: Router) {}
 
   resolve(route: ActivatedRouteSnapshot): Observable<IReview> | Observable<never> {
-    const id = route.params['id'];
-    if (id) {
-      return this.service.find(id).pipe(
+    const companyId = route.params['companyId'];
+    if (companyId) {
+      return this.service.find(companyId).pipe(
         mergeMap((review: HttpResponse<Review>) => {
           if (review.body) {
             return of(review.body);
           } else {
-            this.router.navigate(['404']);
-            return EMPTY;
+            return of(new Review());
           }
         })
       );
     }
-    return of(new Review());
+    this.router.navigate(['404']);
+    return EMPTY;
   }
 }

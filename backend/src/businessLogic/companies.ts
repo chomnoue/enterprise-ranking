@@ -13,20 +13,22 @@ const companySearch = new CompanySearch()
 const fileAccess = new FileAccess()
 
 function setImageUrls(company: CompanyItem) {
+  console.log("Augmenting company item:", company)
   company.meanScore = company.votesCount > 0 ? company.totalScore / company.votesCount : 0
-  company.imageUrls = company.images.map(image => fileAccess.getGetSignedUrl(company.companyId + "/" + image))
+  company.imageUrls = company.images? company.images.map(image => fileAccess.getGetSignedUrl(company.companyId + "/" + image)): []
 }
 
 export async function getCompany(companyId:string): Promise<CompanyItem> {
-  const company = await companyAccess.getCompany(companyId)
+  const company = await companySearch.getCompany(companyId)
   setImageUrls(company)
   return company
 }
 
-export async function getCompanies(text: string, from: number = 0, size: number = 100, sort: string = "votesCount"): Promise<{items:CompanyItem[]}> {
-  const companies = await companySearch.searchCompanies(text, from, size, sort)
+export async function getCompanies(text: string, from: number = 0, size: number = 100, sort: string = "votesCount"): Promise<CompanyItem[]> {
+  sort = sort.split(",")[0]
+  const companies = await companySearch.searchCompanies(text, from, size, sort==="id"? "_id": sort)
   companies.forEach(company => setImageUrls(company))
-  return {items: companies}
+  return companies
 }
 
 export async function createCompany(userId: string, request: FromSchema<typeof CreateCompanyRequest>): Promise<CompanyItem> {
@@ -40,8 +42,7 @@ export async function createCompany(userId: string, request: FromSchema<typeof C
     createdAt: new Date().toISOString(),
     createdBy: userId,
     votesCount: 0,
-    totalScore: 0,
-    images: []
+    totalScore: 0
   }
   await companyAccess.createCompany(companyItem)
   return companyItem

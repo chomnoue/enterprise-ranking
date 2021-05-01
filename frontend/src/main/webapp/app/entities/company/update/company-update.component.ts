@@ -17,6 +17,7 @@ export class CompanyUpdateComponent implements OnInit {
 
   editForm = this.fb.group({
     id: [],
+    name: [null, [Validators.required]],
     country: [null, [Validators.required]],
     industry: [null, [Validators.required]],
     description: [null, [Validators.required]],
@@ -37,7 +38,7 @@ export class CompanyUpdateComponent implements OnInit {
   save(): void {
     this.isSaving = true;
     const company = this.createFromForm();
-    if (company.id !== undefined) {
+    if (company.companyId !== undefined) {
       this.subscribeToSaveResponse(this.companyService.update(company));
     } else {
       this.subscribeToSaveResponse(this.companyService.create(company));
@@ -65,7 +66,8 @@ export class CompanyUpdateComponent implements OnInit {
 
   protected updateForm(company: ICompany): void {
     this.editForm.patchValue({
-      id: company.id,
+      id: company.companyId,
+      name: company.name,
       country: company.country,
       industry: company.industry,
       description: company.description,
@@ -75,7 +77,8 @@ export class CompanyUpdateComponent implements OnInit {
   protected createFromForm(): ICompany {
     return {
       ...new Company(),
-      id: this.editForm.get(['id'])!.value,
+      companyId: this.editForm.get(['id'])!.value,
+      name: this.editForm.get(['name'])!.value,
       country: this.editForm.get(['country'])!.value,
       industry: this.editForm.get(['industry'])!.value,
       description: this.editForm.get(['description'])!.value,

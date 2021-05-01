@@ -33,7 +33,7 @@ const reviewRoute: Routes = [
     canActivate: [UserRouteAccessService],
   },
   {
-    path: ':id/edit',
+    path: 'edit',
     component: ReviewUpdateComponent,
     resolve: {
       review: ReviewRoutingResolveService,

@@ -8,7 +8,7 @@ import { CompanyDeleteDialogComponent } from './delete/company-delete-dialog.com
 import { CompanyRoutingModule } from './route/company-routing.module';
 
 @NgModule({
-  imports: [SharedModule, CompanyRoutingModule],
+  imports: [SharedModule, CompanyRoutingModule,],
   declarations: [CompanyComponent, CompanyDetailComponent, CompanyUpdateComponent, CompanyDeleteDialogComponent],
   entryComponents: [CompanyDeleteDialogComponent],
 })

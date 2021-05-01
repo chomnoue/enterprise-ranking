@@ -58,7 +58,7 @@ export class CompanyComponent implements OnInit {
   }
 
   trackId(index: number, item: ICompany): string {
-    return item.id!;
+    return item.companyId!;
   }
 
   delete(company: ICompany): void {

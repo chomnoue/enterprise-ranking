@@ -10,35 +10,43 @@ import { IReview, getReviewIdentifier } from '../review.model';
 export type EntityResponseType = HttpResponse<IReview>;
 export type EntityArrayResponseType = HttpResponse<IReview[]>;
 
+
+
 @Injectable({ providedIn: 'root' })
 export class ReviewService {
-  public resourceUrl = this.applicationConfigService.getEndpointFor('api/reviews');
 
   constructor(protected http: HttpClient, private applicationConfigService: ApplicationConfigService) {}
 
-  create(review: IReview): Observable<EntityResponseType> {
-    return this.http.post<IReview>(this.resourceUrl, review, { observe: 'response' });
+  resourceUrl(companyId: string): string {
+    return this.applicationConfigService.getEndpointFor(`api/companies/${companyId}/reviews`);
   }
 
-  update(review: IReview): Observable<EntityResponseType> {
-    return this.http.put<IReview>(`${this.resourceUrl}/${getReviewIdentifier(review) as string}`, review, { observe: 'response' });
+  reviewUrl(companyId: string): string {
+    return this.applicationConfigService.getEndpointFor(`api/companies/${companyId}/review`);
+  }
+  create(companyId: string, review: IReview): Observable<EntityResponseType> {
+    return this.http.post<IReview>(this.resourceUrl(companyId), review, { observe: 'response' });
   }
 
-  partialUpdate(review: IReview): Observable<EntityResponseType> {
-    return this.http.patch<IReview>(`${this.resourceUrl}/${getReviewIdentifier(review) as string}`, review, { observe: 'response' });
+  update(companyId: string, review: IReview): Observable<EntityResponseType> {
+    return this.http.put<IReview>(this.resourceUrl(companyId), review, { observe: 'response' });
   }
 
-  find(id: string): Observable<EntityResponseType> {
-    return this.http.get<IReview>(`${this.resourceUrl}/${id}`, { observe: 'response' });
+  partialUpdate(companyId: string, review: IReview): Observable<EntityResponseType> {
+    return this.http.patch<IReview>(this.resourceUrl(companyId), review, { observe: 'response' });
   }
 
-  query(req?: any): Observable<EntityArrayResponseType> {
+  find(companyId: string): Observable<EntityResponseType> {
+    return this.http.get<IReview>(this.reviewUrl(companyId), { observe: 'response' });
+  }
+
+  query(companyId: string, req?: any): Observable<EntityArrayResponseType> {
     const options = createRequestOption(req);
-    return this.http.get<IReview[]>(this.resourceUrl, { params: options, observe: 'response' });
+    return this.http.get<IReview[]>(this.resourceUrl(companyId), { params: options, observe: 'response' });
   }
 
-  delete(id: string): Observable<HttpResponse<{}>> {
-    return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
+  delete(companyId: string): Observable<HttpResponse<{}>> {
+    return this.http.delete(this.resourceUrl(companyId), { observe: 'response' });
   }
 
   addReviewToCollectionIfMissing(reviewCollection: IReview[], ...reviewsToCheck: (IReview | null | undefined)[]): IReview[] {

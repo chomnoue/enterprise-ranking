@@ -16,6 +16,7 @@ import { ReviewDeleteDialogComponent } from '../delete/review-delete-dialog.comp
 })
 export class ReviewComponent implements OnInit {
   reviews?: IReview[];
+  companyId?: string;
   isLoading = false;
   totalItems = 0;
   itemsPerPage = ITEMS_PER_PAGE;
@@ -34,23 +35,29 @@ export class ReviewComponent implements OnInit {
   loadPage(page?: number, dontNavigate?: boolean): void {
     this.isLoading = true;
     const pageToLoad: number = page ?? this.page ?? 1;
+    this.activatedRoute.params.subscribe(params => {
+      this.companyId = params["companyId"];
+      if(this.companyId){
+        this.reviewService
+        .query(this.companyId, {
+          page: pageToLoad - 1,
+          size: this.itemsPerPage,
+          sort: this.sort(),
+        })
+        .subscribe(
+          (res: HttpResponse<IReview[]>) => {
+            this.isLoading = false;
+            this.onSuccess(res.body, res.headers, pageToLoad, !dontNavigate);
+          },
+          () => {
+            this.isLoading = false;
+            this.onError();
+          }
+        );
+      }
+    })
 
-    this.reviewService
-      .query({
-        page: pageToLoad - 1,
-        size: this.itemsPerPage,
-        sort: this.sort(),
-      })
-      .subscribe(
-        (res: HttpResponse<IReview[]>) => {
-          this.isLoading = false;
-          this.onSuccess(res.body, res.headers, pageToLoad, !dontNavigate);
-        },
-        () => {
-          this.isLoading = false;
-          this.onError();
-        }
-      );
+
   }
 
   ngOnInit(): void {
@@ -58,7 +65,7 @@ export class ReviewComponent implements OnInit {
   }
 
   trackId(index: number, item: IReview): string {
-    return item.id!;
+    return item.userId!;
   }
 
   delete(review: IReview): void {

@@ -19,8 +19,11 @@
       },
       "id": "Id",
       "country": "Country",
+      "name": "Name",
       "industry": "Industry",
-      "description": "Description"
+      "description": "Description",
+      "votesCount": "Votes Count",
+      "meanScore": "Score"
     }
   }
 }

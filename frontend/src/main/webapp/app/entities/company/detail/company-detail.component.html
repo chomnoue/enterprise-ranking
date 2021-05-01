@@ -9,32 +9,84 @@
 
       <jhi-alert></jhi-alert>
 
-      <dl class="row-md jh-entity-details">
-        <dt><span jhiTranslate="enterpriseRankingApp.company.id">Id</span></dt>
-        <dd>
-          <span>{{ company.id }}</span>
-        </dd>
-        <dt><span jhiTranslate="enterpriseRankingApp.company.country">Country</span></dt>
-        <dd>
-          <span>{{ company.country }}</span>
-        </dd>
-        <dt><span jhiTranslate="enterpriseRankingApp.company.industry">Industry</span></dt>
-        <dd>
-          <span>{{ company.industry }}</span>
-        </dd>
-        <dt><span jhiTranslate="enterpriseRankingApp.company.description">Description</span></dt>
-        <dd>
-          <span>{{ company.description }}</span>
-        </dd>
-      </dl>
+      <div class="container">
+        <div class="row">
+          <div class="col-sm">
+            <dl class="row-md jh-entity-details">
+              <dt><span jhiTranslate="enterpriseRankingApp.company.name">Id</span></dt>
+              <dd>
+                <span>{{ company.name }}</span>
+              </dd>
+              <dt><span jhiTranslate="enterpriseRankingApp.company.country">Country</span></dt>
+              <dd>
+                <span>{{ company.country }}</span>
+              </dd>
+              <dt><span jhiTranslate="enterpriseRankingApp.company.industry">Industry</span></dt>
+              <dd>
+                <span>{{ company.industry }}</span>
+              </dd>
+              <dt><span jhiTranslate="enterpriseRankingApp.company.description">Description</span></dt>
+              <dd>
+                <span>{{ company.description }}</span>
+              </dd>
+              <dt><span jhiTranslate="enterpriseRankingApp.company.votesCount">Votes Count</span></dt>
+              <dd>
+                <span>{{ company.votesCount }}</span>
+              </dd>
+              <dt><span jhiTranslate="enterpriseRankingApp.company.meanScore">Score</span></dt>
+              <dd>
+                <span>{{ company.meanScore }}</span>
+              </dd>
+            </dl>
+          </div>
+          <div class="col-sm">
+            <div id="carouselExampleControls" #carouselExampleControls class="carousel slide" data-ride="carousel">
+              <div class="carousel-inner">
+                <div class="carousel-item" *ngFor="let url of company.imageUrls; let i = index"
+                     [class.active]="currImage === i">
+                  <img class="d-block w-100" [src]="url" alt="Image">
+                </div>
+              </div>
+              <a class="carousel-control-prev" data-target="#carouselExampleControls" role="button" data-slide="prev"
+                 (click)="prevImage()">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+              </a>
+              <a class="carousel-control-next" data-target="#carouselExampleControls" role="button" data-slide="next"
+                 (click)="nextImage()">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
         <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Back</span>
       </button>
 
-      <button type="button" [routerLink]="['/company', company.id, 'edit']" class="btn btn-primary">
+      <button type="button" [routerLink]="['/company', company.companyId, 'edit']" class="btn btn-primary">
         <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
       </button>
+
+      <button type="button" [routerLink]="['/company', company.companyId, 'reviews']" class="btn btn-primary">
+        <fa-icon icon="comments"></fa-icon>&nbsp;<span>Reviews</span>
+      </button>
+
+
+      <div class="form-group">
+        <label for="file">Choose File to upload</label>
+        <input type="file"
+               id="file"
+               (change)="handleFileInput($event.target)">
+      </div>
+
+      <button type="button" class="btn btn-primary" *ngIf="fileToUpload" (click)="uploadFile()">
+        <fa-icon icon="cloud-upload-alt"></fa-icon>&nbsp;<span>Upload File</span>
+      </button>
+
     </div>
   </div>
 </div>

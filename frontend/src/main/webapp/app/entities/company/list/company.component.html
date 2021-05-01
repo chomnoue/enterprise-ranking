@@ -32,7 +32,8 @@
     <table class="table table-striped" aria-describedby="page-heading">
       <thead>
         <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending" [callback]="loadPage.bind(this)">
-          <th scope="col" jhiSortBy="id"><span jhiTranslate="enterpriseRankingApp.company.id">Id</span> <fa-icon icon="sort"></fa-icon></th>
+          <th scope="col" jhiSortBy="name">
+            <span jhiTranslate="enterpriseRankingApp.company.name">Name</span> <fa-icon icon="sort"></fa-icon></th>
           <th scope="col" jhiSortBy="country">
             <span jhiTranslate="enterpriseRankingApp.company.country">Country</span> <fa-icon icon="sort"></fa-icon>
           </th>
@@ -42,22 +43,31 @@
           <th scope="col" jhiSortBy="description">
             <span jhiTranslate="enterpriseRankingApp.company.description">Description</span> <fa-icon icon="sort"></fa-icon>
           </th>
+          <th scope="col" jhiSortBy="votesCount">
+            <span jhiTranslate="enterpriseRankingApp.company.votesCount">Votes Count</span> <fa-icon
+            icon="sort"></fa-icon>
+          </th>
+          <th scope="col" jhiSortBy="meanScore">
+            <span jhiTranslate="enterpriseRankingApp.company.meanScore">Score</span> <fa-icon icon="sort"></fa-icon>
+          </th>
           <th scope="col"></th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let company of companies; trackBy: trackId" data-cy="entityTable">
           <td>
-            <a [routerLink]="['/company', company.id, 'view']">{{ company.id }}</a>
+            <a [routerLink]="['/company', company.companyId, 'view']">{{ company.name }}</a>
           </td>
           <td>{{ company.country }}</td>
           <td>{{ company.industry }}</td>
           <td>{{ company.description }}</td>
+          <td>{{ company.votesCount }}</td>
+          <td>{{ company.meanScore }}</td>
           <td class="text-right">
             <div class="btn-group">
               <button
                 type="submit"
-                [routerLink]="['/company', company.id, 'view']"
+                [routerLink]="['/company', company.companyId, 'view']"
                 class="btn btn-info btn-sm"
                 data-cy="entityDetailsButton"
               >
@@ -67,7 +77,7 @@
 
               <button
                 type="submit"
-                [routerLink]="['/company', company.id, 'edit']"
+                [routerLink]="['/company', company.companyId, 'edit']"
                 class="btn btn-primary btn-sm"
                 data-cy="entityEditButton"
               >

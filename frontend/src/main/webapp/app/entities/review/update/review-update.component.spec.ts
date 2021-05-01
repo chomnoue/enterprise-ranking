@@ -37,7 +37,7 @@ describe('Component Tests', () => {
 
     describe('ngOnInit', () => {
       it('Should update editForm', () => {
-        const review: IReview = { id: 'CBA' };
+        const review: IReview = { userId: 'CBA' };
 
         activatedRoute.data = of({ review });
         comp.ngOnInit();

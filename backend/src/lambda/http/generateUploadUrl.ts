@@ -6,7 +6,7 @@ import {generateUploadUrl} from "../../businessLogic/companies";
 import {middyfy} from "../../utils/lambda";
 
 const generateUploadUrlHandler: ValidatedEventAPIGatewayHandler<any> = async (event): Promise<APIGatewayProxyResult> => {
-  const uploadUrls = await generateUploadUrl(event.pathParameters.todoId)
+  const uploadUrls = await generateUploadUrl(event.pathParameters.companyId)
   return formatJSONResponse(uploadUrls)
 }
 

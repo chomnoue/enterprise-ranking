@@ -14,11 +14,11 @@ import { ReviewService } from '../service/review.service';
 })
 export class ReviewUpdateComponent implements OnInit {
   isSaving = false;
-
+  companyId?: string;
   editForm = this.fb.group({
-    id: [],
-    companyId: [null, [Validators.required]],
-    comment: [],
+    userId: [],
+    companyId: [],
+    comment: [null, [Validators.required]],
     score: [null, [Validators.required, Validators.min(1), Validators.max(5)]],
   });
 
@@ -28,6 +28,9 @@ export class ReviewUpdateComponent implements OnInit {
     this.activatedRoute.data.subscribe(({ review }) => {
       this.updateForm(review);
     });
+    this.activatedRoute.params.subscribe(params => {
+      this.companyId = params["companyId"];
+    });
   }
 
   previousState(): void {
@@ -35,12 +38,14 @@ export class ReviewUpdateComponent implements OnInit {
   }
 
   save(): void {
-    this.isSaving = true;
-    const review = this.createFromForm();
-    if (review.id !== undefined) {
-      this.subscribeToSaveResponse(this.reviewService.update(review));
-    } else {
-      this.subscribeToSaveResponse(this.reviewService.create(review));
+    if(this.companyId){
+      this.isSaving = true;
+      const review = this.createFromForm();
+      if (review.userId) {
+        this.subscribeToSaveResponse(this.reviewService.update(this.companyId, review));
+      } else {
+        this.subscribeToSaveResponse(this.reviewService.create(this.companyId,review));
+      }
     }
   }
 
@@ -65,9 +70,9 @@ export class ReviewUpdateComponent implements OnInit {
 
   protected updateForm(review: IReview): void {
     this.editForm.patchValue({
-      id: review.id,
+      id: review.userId,
       companyId: review.companyId,
-      comment: review.comment,
+      comment: review.review,
       score: review.score,
     });
   }
@@ -75,9 +80,9 @@ export class ReviewUpdateComponent implements OnInit {
   protected createFromForm(): IReview {
     return {
       ...new Review(),
-      id: this.editForm.get(['id'])!.value,
+      userId: this.editForm.get(['userId'])!.value,
       companyId: this.editForm.get(['companyId'])!.value,
-      comment: this.editForm.get(['comment'])!.value,
+      review: this.editForm.get(['comment'])!.value,
       score: this.editForm.get(['score'])!.value,
     };
   }

@@ -40,6 +40,11 @@ const companyRoute: Routes = [
     },
     canActivate: [UserRouteAccessService],
   },
+  {
+    path: ':companyId/reviews',
+    data: { pageTitle: 'enterpriseRankingApp.review.home.title' },
+    loadChildren: () => import('../../review/review.module').then(m => m.ReviewModule),
+  },
 ];
 
 @NgModule({

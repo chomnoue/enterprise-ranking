@@ -12,10 +12,14 @@
         id="jh-create-entity"
         data-cy="entityCreateButton"
         class="btn btn-primary jh-create-entity create-review"
-        [routerLink]="['/review/new']"
+        [routerLink]="['/company', companyId, 'reviews', 'edit']"
       >
         <fa-icon icon="plus"></fa-icon>
-        <span jhiTranslate="enterpriseRankingApp.review.home.createLabel"> Create a new Review </span>
+        <span jhiTranslate="enterpriseRankingApp.review.home.createOrEditLabel"> Create/Edit a Review </span>
+      </button>
+
+      <button [routerLink]="['/company', companyId, 'view']" class="btn btn-info mr-2">
+        <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Back</span>
       </button>
     </div>
   </h2>
@@ -32,10 +36,7 @@
     <table class="table table-striped" aria-describedby="page-heading">
       <thead>
         <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending" [callback]="loadPage.bind(this)">
-          <th scope="col" jhiSortBy="id"><span jhiTranslate="enterpriseRankingApp.review.id">Id</span> <fa-icon icon="sort"></fa-icon></th>
-          <th scope="col" jhiSortBy="companyId">
-            <span jhiTranslate="enterpriseRankingApp.review.companyId">Company Id</span> <fa-icon icon="sort"></fa-icon>
-          </th>
+          <th scope="col" jhiSortBy="userId"><span>User Id</span> <fa-icon icon="sort"></fa-icon></th>
           <th scope="col" jhiSortBy="comment">
             <span jhiTranslate="enterpriseRankingApp.review.comment">Comment</span> <fa-icon icon="sort"></fa-icon>
           </th>
@@ -47,20 +48,17 @@
       </thead>
       <tbody>
         <tr *ngFor="let review of reviews; trackBy: trackId" data-cy="entityTable">
-          <td>
-            <a [routerLink]="['/review', review.id, 'view']">{{ review.id }}</a>
-          </td>
-          <td>{{ review.companyId }}</td>
-          <td>{{ review.comment }}</td>
+          <td>{{ review.userId }}</td>
+          <td>{{ review.review }}</td>
           <td>{{ review.score }}</td>
           <td class="text-right">
             <div class="btn-group">
-              <button type="submit" [routerLink]="['/review', review.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+              <button type="submit" [routerLink]="['/review', review.userId, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
                 <fa-icon icon="eye"></fa-icon>
                 <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
               </button>
 
-              <button type="submit" [routerLink]="['/review', review.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+              <button type="submit" [routerLink]="['/review', review.userId, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
                 <fa-icon icon="pencil-alt"></fa-icon>
                 <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
               </button>

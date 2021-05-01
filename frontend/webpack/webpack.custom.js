@@ -101,7 +101,7 @@ module.exports = (config, options, targetOptions) => {
         // If this URL is left empty (""), then it will be relative to the current context.
         // If you use an API server, in `prod` mode, you will need to enable CORS
         // (see the `jhipster.cors` common JHipster property in the `application-*.yml` configurations)
-        SERVER_API_URL: `''`,
+        SERVER_API_URL: `'https://7zwv96mfrk.execute-api.us-east-1.amazonaws.com/dev/'`,
       },
     }),
     new MergeJsonWebpackPlugin({

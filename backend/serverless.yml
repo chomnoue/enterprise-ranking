@@ -20,6 +20,8 @@ provider:
     REVIEWS_TABLE: Reviews-${self:provider.stage}
     REVIEWS_CREATION_DATE_INDEX: CreatedAtIndex
     ATTACHMENTS_BUCKET: chomnoue-companies-ranking-attachments-${self:provider.stage}
+    ES_ENDPOINT: !GetAtt CompaniesSearch.DomainEndpoint
+
 custom:
   topicName: attachmentsTopic-${self:provider.stage}
 
@@ -33,7 +35,7 @@ functions:
     events:
       - http:
           method: get
-          path: companies
+          path: api/companies
           cors: true
           authorizer: Auth
     role: GetCompaniesRole
@@ -43,7 +45,7 @@ functions:
     events:
       - http:
           method: get
-          path: companies/{companyId}
+          path: api/companies/{companyId}
           cors: true
           authorizer: Auth
     role: GetCompanyRole
@@ -53,7 +55,7 @@ functions:
     events:
       - http:
           method: post
-          path: companies
+          path: api/companies
           cors: true
           authorizer: Auth
           request:
@@ -66,7 +68,7 @@ functions:
     events:
       - http:
           method: patch
-          path: companies/{companyId}
+          path: api/companies/{companyId}
           cors: true
           authorizer: Auth
           request:
@@ -79,7 +81,7 @@ functions:
     events:
       - http:
           method: delete
-          path: companies/{companyId}
+          path: api/companies/{companyId}
           cors: true
           authorizer: Auth
     role: DeleteCompanyRole
@@ -89,7 +91,7 @@ functions:
     events:
       - http:
           method: post
-          path: companies/{companyId}/attachment
+          path: api/companies/{companyId}/attachment
           cors: true
           authorizer: Auth
     role: GenerateUploadUrlRole
@@ -99,7 +101,7 @@ functions:
     events:
       - http:
           method: get
-          path: companies/{companyId}/reviews
+          path: api/companies/{companyId}/reviews
           cors: true
           authorizer: Auth
     role: GetReviewsRole
@@ -109,7 +111,7 @@ functions:
     events:
       - http:
           method: get
-          path: companies/{companyId}/review
+          path: api/companies/{companyId}/review
           cors: true
           authorizer: Auth
     role: GetReviewRole
@@ -119,7 +121,7 @@ functions:
     events:
       - http:
           method: post
-          path: companies/{companyId}/reviews
+          path: api/companies/{companyId}/reviews
           cors: true
           authorizer: Auth
           request:
@@ -132,7 +134,7 @@ functions:
     events:
       - http:
           method: patch
-          path: companies/{companyId}/review
+          path: api/companies/{companyId}/review
           cors: true
           authorizer: Auth
           request:
@@ -145,7 +147,7 @@ functions:
     events:
       - http:
           method: delete
-          path: companies/{companyId}/review
+          path: api/companies/{companyId}/review
           cors: true
           authorizer: Auth
     role: DeleteReviewRole
@@ -174,6 +176,12 @@ functions:
                 - ${self:custom.topicName}
           topicName: ${self:custom.topicName}
     role: CompaniesImagesSyncRole
+
+  InitResources:
+    handler: src/lambda/init/initResources.handler
+    role: InitResourcesRole
+    environment:
+      ES_ENDPOINT: !GetAtt CompaniesSearch.DomainEndpoint
 
 resources:
   Resources:
@@ -233,6 +241,10 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.environment.ATTACHMENTS_BUCKET}
+        NotificationConfiguration:
+          TopicConfigurations:
+            - Event: s3:ObjectCreated:Put
+              Topic: !Ref AttachmentsTopic
         CorsConfiguration:
           CorsRules:
             -
@@ -508,10 +520,6 @@ resources:
                 - *xrayStatement
                 - Effect: Allow
                   Action:
-                    - dynamodb:UpdateItem
-                  Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
-                - Effect: Allow
-                  Action:
                     - dynamodb:GetRecords
                     - dynamodb:GetShardIterator
                     - dynamodb:DescribeStream
@@ -535,6 +543,20 @@ resources:
                   Action:
                     - dynamodb:UpdateItem
                   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.COMPANIES_TABLE}
+
+
+    InitResourcesRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument: *assumeRolePolicyDocument
+        Policies:
+          - PolicyName: initResourcesPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - *logsStatement
+                - *xrayStatement
+
 
     CompaniesSearch:
       Type: AWS::Elasticsearch::Domain
@@ -570,5 +592,15 @@ resources:
             - Effect: Allow
               Principal:
                 AWS: !GetAtt GetCompaniesRole.Arn
+              Action: 'es:*'
+              Resource: *companiesSearchResource
+            - Effect: Allow
+              Principal:
+                AWS: !GetAtt GetCompanyRole.Arn
+              Action: 'es:*'
+              Resource: *companiesSearchResource
+            - Effect: Allow
+              Principal:
+                AWS: !GetAtt InitResourcesRole.Arn
               Action: 'es:*'
               Resource: *companiesSearchResource

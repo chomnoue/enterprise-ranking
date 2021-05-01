@@ -48,9 +48,12 @@ export class CompanyAccess {
     await this.docClient.update({
       TableName: this.companiesTable,
       Key: {companyId},
-      UpdateExpression: "add images :keys",
+      UpdateExpression: "add #images :keys",
+      ExpressionAttributeNames: {
+        '#images': 'images'
+      },
       ExpressionAttributeValues: {
-        ":keys": [key]
+        ":keys": this.docClient.createSet([key])
       },
       ReturnValues: "UPDATED_NEW"
     }).promise();

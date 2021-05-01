@@ -9,6 +9,6 @@ export interface CompanyItem {
   votesCount: number
   totalScore: number
   meanScore?: number
-  images: string[]
+  images?: string[]
   imageUrls?: string[]
 }

@@ -21,7 +21,7 @@ describe('Service Tests', () => {
       httpMock = TestBed.inject(HttpTestingController);
 
       elemDefault = {
-        id: 'AAAAAAA',
+        companyId: 'AAAAAAA',
         country: 'AAAAAAA',
         industry: 'AAAAAAA',
         description: 'AAAAAAA',
@@ -121,42 +121,42 @@ describe('Service Tests', () => {
 
       describe('addCompanyToCollectionIfMissing', () => {
         it('should add a Company to an empty array', () => {
-          const company: ICompany = { id: 'ABC' };
+          const company: ICompany = { companyId: 'ABC' };
           expectedResult = service.addCompanyToCollectionIfMissing([], company);
           expect(expectedResult).toHaveLength(1);
           expect(expectedResult).toContain(company);
         });
 
         it('should not add a Company to an array that contains it', () => {
-          const company: ICompany = { id: 'ABC' };
+          const company: ICompany = { companyId: 'ABC' };
           const companyCollection: ICompany[] = [
             {
               ...company,
             },
-            { id: 'CBA' },
+            { companyId: 'CBA' },
           ];
           expectedResult = service.addCompanyToCollectionIfMissing(companyCollection, company);
           expect(expectedResult).toHaveLength(2);
         });
 
         it("should add a Company to an array that doesn't contain it", () => {
-          const company: ICompany = { id: 'ABC' };
-          const companyCollection: ICompany[] = [{ id: 'CBA' }];
+          const company: ICompany = { companyId: 'ABC' };
+          const companyCollection: ICompany[] = [{ companyId: 'CBA' }];
           expectedResult = service.addCompanyToCollectionIfMissing(companyCollection, company);
           expect(expectedResult).toHaveLength(2);
           expect(expectedResult).toContain(company);
         });
 
         it('should add only unique Company to an array', () => {
-          const companyArray: ICompany[] = [{ id: 'ABC' }, { id: 'CBA' }, { id: 'Fantastic' }];
-          const companyCollection: ICompany[] = [{ id: 'ABC' }];
+          const companyArray: ICompany[] = [{ companyId: 'ABC' }, { companyId: 'CBA' }, { companyId: 'Fantastic' }];
+          const companyCollection: ICompany[] = [{ companyId: 'ABC' }];
           expectedResult = service.addCompanyToCollectionIfMissing(companyCollection, ...companyArray);
           expect(expectedResult).toHaveLength(3);
         });
 
         it('should accept varargs', () => {
-          const company: ICompany = { id: 'ABC' };
-          const company2: ICompany = { id: 'CBA' };
+          const company: ICompany = { companyId: 'ABC' };
+          const company2: ICompany = { companyId: 'CBA' };
           expectedResult = service.addCompanyToCollectionIfMissing([], company, company2);
           expect(expectedResult).toHaveLength(2);
           expect(expectedResult).toContain(company);
@@ -164,7 +164,7 @@ describe('Service Tests', () => {
         });
 
         it('should accept null and undefined values', () => {
-          const company: ICompany = { id: 'ABC' };
+          const company: ICompany = { companyId: 'ABC' };
           expectedResult = service.addCompanyToCollectionIfMissing([], null, company, undefined);
           expect(expectedResult).toHaveLength(1);
           expect(expectedResult).toContain(company);

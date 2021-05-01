@@ -9,35 +9,13 @@
         <jhi-alert-error></jhi-alert-error>
 
         <div class="form-group">
-          <label class="form-control-label" jhiTranslate="enterpriseRankingApp.review.id" for="field_id">Id</label>
-          <input
-            type="text"
-            class="form-control"
-            name="id"
-            id="field_id"
-            data-cy="id"
-            formControlName="id"
-            [readonly]="editForm.get('id')!.value != null"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-control-label" jhiTranslate="enterpriseRankingApp.review.companyId" for="field_companyId">Company Id</label>
-          <input type="text" class="form-control" name="companyId" id="field_companyId" data-cy="companyId" formControlName="companyId" />
-          <div *ngIf="editForm.get('companyId')!.invalid && (editForm.get('companyId')!.dirty || editForm.get('companyId')!.touched)">
-            <small
-              class="form-text text-danger"
-              *ngIf="editForm.get('companyId')?.errors?.required"
-              jhiTranslate="entity.validation.required"
-            >
+          <label class="form-control-label" jhiTranslate="enterpriseRankingApp.review.comment" for="field_comment">Comment</label>
+          <input type="text" class="form-control" name="comment" id="field_comment" data-cy="comment" formControlName="comment" />
+          <div *ngIf="editForm.get('comment')!.invalid && (editForm.get('comment')!.dirty || editForm.get('comment')!.touched)">
+            <small class="form-text text-danger" *ngIf="editForm.get('comment')?.errors?.required" jhiTranslate="entity.validation.required">
               This field is required.
             </small>
           </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-control-label" jhiTranslate="enterpriseRankingApp.review.comment" for="field_comment">Comment</label>
-          <input type="text" class="form-control" name="comment" id="field_comment" data-cy="comment" formControlName="comment" />
         </div>
 
         <div class="form-group">

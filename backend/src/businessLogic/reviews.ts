@@ -12,7 +12,7 @@ export async function getReview(companyId: string, userId: string): Promise<Revi
   return await reviewAccess.getReview(companyId, userId)
 }
 
-export async function getReviews(companyId: string, next?: NextReview, limit?: number): Promise<{ items: ReviewItem[] }> {
+export async function getReviews(companyId: string, next?: NextReview, limit?: number): Promise<ReviewItem[]> {
   return await reviewAccess.getReviews(companyId, next, limit)
 }
 

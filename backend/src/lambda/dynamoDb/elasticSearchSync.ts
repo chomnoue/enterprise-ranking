@@ -26,7 +26,7 @@ export const handler: DynamoDBStreamHandler = async (event: DynamoDBStreamEvent)
       description: newItem.description.S,
       createdAt: newItem.createdAt.S,
       createdBy: newItem.createdBy.S,
-      images: newItem.images.SS,
+      images: newItem.images?.SS ?? [],
       votesCount,
       totalScore,
       meanScore

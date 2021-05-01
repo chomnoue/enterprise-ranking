@@ -21,9 +21,9 @@ describe('Service Tests', () => {
       httpMock = TestBed.inject(HttpTestingController);
 
       elemDefault = {
-        id: 'AAAAAAA',
+        userId: 'AAAAAAA',
         companyId: 'AAAAAAA',
-        comment: 'AAAAAAA',
+        review: 'AAAAAAA',
         score: 0,
       };
     });
@@ -127,42 +127,42 @@ describe('Service Tests', () => {
 
       describe('addReviewToCollectionIfMissing', () => {
         it('should add a Review to an empty array', () => {
-          const review: IReview = { id: 'ABC' };
+          const review: IReview = { userId: 'ABC' };
           expectedResult = service.addReviewToCollectionIfMissing([], review);
           expect(expectedResult).toHaveLength(1);
           expect(expectedResult).toContain(review);
         });
 
         it('should not add a Review to an array that contains it', () => {
-          const review: IReview = { id: 'ABC' };
+          const review: IReview = { userId: 'ABC' };
           const reviewCollection: IReview[] = [
             {
               ...review,
             },
-            { id: 'CBA' },
+            { userId: 'CBA' },
           ];
           expectedResult = service.addReviewToCollectionIfMissing(reviewCollection, review);
           expect(expectedResult).toHaveLength(2);
         });
 
         it("should add a Review to an array that doesn't contain it", () => {
-          const review: IReview = { id: 'ABC' };
-          const reviewCollection: IReview[] = [{ id: 'CBA' }];
+          const review: IReview = { userId: 'ABC' };
+          const reviewCollection: IReview[] = [{ userId: 'CBA' }];
           expectedResult = service.addReviewToCollectionIfMissing(reviewCollection, review);
           expect(expectedResult).toHaveLength(2);
           expect(expectedResult).toContain(review);
         });
 
         it('should add only unique Review to an array', () => {
-          const reviewArray: IReview[] = [{ id: 'ABC' }, { id: 'CBA' }, { id: 'Team-oriented Nebraska Kentucky' }];
-          const reviewCollection: IReview[] = [{ id: 'ABC' }];
+          const reviewArray: IReview[] = [{ userId: 'ABC' }, { userId: 'CBA' }, { userId: 'Team-oriented Nebraska Kentucky' }];
+          const reviewCollection: IReview[] = [{ userId: 'ABC' }];
           expectedResult = service.addReviewToCollectionIfMissing(reviewCollection, ...reviewArray);
           expect(expectedResult).toHaveLength(3);
         });
 
         it('should accept varargs', () => {
-          const review: IReview = { id: 'ABC' };
-          const review2: IReview = { id: 'CBA' };
+          const review: IReview = { userId: 'ABC' };
+          const review2: IReview = { userId: 'CBA' };
           expectedResult = service.addReviewToCollectionIfMissing([], review, review2);
           expect(expectedResult).toHaveLength(2);
           expect(expectedResult).toContain(review);
@@ -170,7 +170,7 @@ describe('Service Tests', () => {
         });
 
         it('should accept null and undefined values', () => {
-          const review: IReview = { id: 'ABC' };
+          const review: IReview = { userId: 'ABC' };
           expectedResult = service.addReviewToCollectionIfMissing([], null, review, undefined);
           expect(expectedResult).toHaveLength(1);
           expect(expectedResult).toContain(review);

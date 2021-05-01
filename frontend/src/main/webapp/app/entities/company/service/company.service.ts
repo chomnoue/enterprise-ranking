@@ -6,6 +6,8 @@ import { isPresent } from 'app/core/util/operators';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { createRequestOption } from 'app/core/request/request-util';
 import { ICompany, getCompanyIdentifier } from '../company.model';
+import {Urls} from "app/entities/company/Urls";
+import {map, mergeMap} from "rxjs/operators";
 
 export type EntityResponseType = HttpResponse<ICompany>;
 export type EntityArrayResponseType = HttpResponse<ICompany[]>;
@@ -39,6 +41,12 @@ export class CompanyService {
 
   delete(id: string): Observable<HttpResponse<{}>> {
     return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
+  }
+
+  uploadFile(fileToUpload: File, id: string): Observable<string> {
+    return this.http.post<Urls>(`${this.resourceUrl}/${id}/attachment`, {observe: 'response'})
+    .pipe(mergeMap(urls => this.http.put(urls.put, fileToUpload, {observe: 'response'})
+    .pipe(map(() => urls.get))));
   }
 
   addCompanyToCollectionIfMissing(companyCollection: ICompany[], ...companiesToCheck: (ICompany | null | undefined)[]): ICompany[] {
