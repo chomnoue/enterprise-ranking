@@ -29,10 +29,6 @@ export class ReviewService {
   }
 
   update(companyId: string, review: IReview): Observable<EntityResponseType> {
-    return this.http.put<IReview>(this.resourceUrl(companyId), review, { observe: 'response' });
-  }
-
-  partialUpdate(companyId: string, review: IReview): Observable<EntityResponseType> {
     return this.http.patch<IReview>(this.resourceUrl(companyId), review, { observe: 'response' });
   }
 

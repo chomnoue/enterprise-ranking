@@ -134,7 +134,7 @@ functions:
     events:
       - http:
           method: patch
-          path: api/companies/{companyId}/review
+          path: api/companies/{companyId}/reviews
           cors: true
           authorizer: Auth
           request:
@@ -147,7 +147,7 @@ functions:
     events:
       - http:
           method: delete
-          path: api/companies/{companyId}/review
+          path: api/companies/{companyId}/reviews
           cors: true
           authorizer: Auth
     role: DeleteReviewRole

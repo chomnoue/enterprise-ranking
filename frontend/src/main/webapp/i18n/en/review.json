@@ -5,7 +5,7 @@
         "title": "Reviews",
         "refreshListLabel": "Refresh list",
         "createLabel": "Create a new Review",
-        "createOrEditLabel": "Create or edit a Review",
+        "createOrEditLabel": "My Review",
         "notFound": "No Reviews found"
       },
       "created": "A new Review is created with identifier {{ param }}",

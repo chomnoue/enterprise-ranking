@@ -19,7 +19,6 @@ function toAccount(user: User | null | undefined) : Account | null | undefined {
       email: user.email,
       firstName: user.given_name,
       lastName: user.family_name,
-      langKey: user.locale,
       login: user.name,
       imageUrl: user.picture,
       authorities: []

@@ -15,7 +15,7 @@
         [routerLink]="['/company', companyId, 'reviews', 'edit']"
       >
         <fa-icon icon="plus"></fa-icon>
-        <span jhiTranslate="enterpriseRankingApp.review.home.createOrEditLabel"> Create/Edit a Review </span>
+        <span jhiTranslate="enterpriseRankingApp.review.home.createOrEditLabel"> My Review </span>
       </button>
 
       <button [routerLink]="['/company', companyId, 'view']" class="btn btn-info mr-2">
@@ -51,24 +51,24 @@
           <td>{{ review.userId }}</td>
           <td>{{ review.review }}</td>
           <td>{{ review.score }}</td>
-          <td class="text-right">
-            <div class="btn-group">
-              <button type="submit" [routerLink]="['/review', review.userId, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
-                <fa-icon icon="eye"></fa-icon>
-                <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
-              </button>
+<!--          <td class="text-right">-->
+<!--            <div class="btn-group">-->
+<!--              <button type="submit" [routerLink]="['/review', review.userId, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">-->
+<!--                <fa-icon icon="eye"></fa-icon>-->
+<!--                <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>-->
+<!--              </button>-->
 
-              <button type="submit" [routerLink]="['/review', review.userId, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
-                <fa-icon icon="pencil-alt"></fa-icon>
-                <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
-              </button>
+<!--              <button type="submit" [routerLink]="['/review', review.userId, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">-->
+<!--                <fa-icon icon="pencil-alt"></fa-icon>-->
+<!--                <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>-->
+<!--              </button>-->
 
-              <button type="submit" (click)="delete(review)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
-                <fa-icon icon="times"></fa-icon>
-                <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
-              </button>
-            </div>
-          </td>
+<!--              <button type="submit" (click)="delete(review)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">-->
+<!--                <fa-icon icon="times"></fa-icon>-->
+<!--                <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>-->
+<!--              </button>-->
+<!--            </div>-->
+<!--          </td>-->
         </tr>
       </tbody>
     </table>

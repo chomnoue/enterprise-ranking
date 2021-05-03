@@ -68,17 +68,6 @@ export class ReviewComponent implements OnInit {
     return item.userId!;
   }
 
-  delete(review: IReview): void {
-    const modalRef = this.modalService.open(ReviewDeleteDialogComponent, { size: 'lg', backdrop: 'static' });
-    modalRef.componentInstance.review = review;
-    // unsubscribe not needed because closed completes on modal close
-    modalRef.closed.subscribe(reason => {
-      if (reason === 'deleted') {
-        this.loadPage();
-      }
-    });
-  }
-
   protected sort(): string[] {
     const result = [this.predicate + ',' + (this.ascending ? 'asc' : 'desc')];
     if (this.predicate !== 'id') {
@@ -106,7 +95,7 @@ export class ReviewComponent implements OnInit {
     this.totalItems = Number(headers.get('X-Total-Count'));
     this.page = page;
     if (navigate) {
-      this.router.navigate(['/review'], {
+      this.router.navigate(['/company', this.companyId,'reviews'], {
         queryParams: {
           page: this.page,
           size: this.itemsPerPage,

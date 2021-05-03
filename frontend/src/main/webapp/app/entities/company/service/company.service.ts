@@ -23,10 +23,6 @@ export class CompanyService {
   }
 
   update(company: ICompany): Observable<EntityResponseType> {
-    return this.http.put<ICompany>(`${this.resourceUrl}/${getCompanyIdentifier(company) as string}`, company, { observe: 'response' });
-  }
-
-  partialUpdate(company: ICompany): Observable<EntityResponseType> {
     return this.http.patch<ICompany>(`${this.resourceUrl}/${getCompanyIdentifier(company) as string}`, company, { observe: 'response' });
   }
 

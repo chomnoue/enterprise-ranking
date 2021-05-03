@@ -16,8 +16,8 @@ export class ReviewDeleteDialogComponent {
     this.activeModal.dismiss();
   }
 
-  confirmDelete(id: string): void {
-    this.reviewService.delete(id).subscribe(() => {
+  confirmDelete(companyId: string): void {
+    this.reviewService.delete(companyId).subscribe(() => {
       this.activeModal.close('deleted');
     });
   }

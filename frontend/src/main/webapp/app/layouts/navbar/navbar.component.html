@@ -28,7 +28,7 @@
       </li>
       <!-- jhipster-needle-add-element-to-menu - JHipster will add new menu items here -->
       <li
-        *ngSwitchCase="true"
+        *ngSwitchCase="false"
         ngbDropdown
         class="nav-item dropdown pointer"
         display="dynamic"
@@ -165,13 +165,13 @@
           </span>
         </a>
         <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="account-menu">
-          <li *ngSwitchCase="true">
+          <li *ngSwitchCase="false">
             <a class="dropdown-item" routerLink="account/settings" routerLinkActive="active" (click)="collapseNavbar()" data-cy="settings">
               <fa-icon icon="wrench" [fixedWidth]="true"></fa-icon>
               <span jhiTranslate="global.menu.account.settings">Settings</span>
             </a>
           </li>
-          <li *ngSwitchCase="true">
+          <li *ngSwitchCase="false">
             <a
               class="dropdown-item"
               routerLink="account/password"

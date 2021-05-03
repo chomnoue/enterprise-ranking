@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import { IReview, Review } from '../review.model';
 import { ReviewService } from '../service/review.service';
+import {ReviewDeleteDialogComponent} from "app/entities/review/delete/review-delete-dialog.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'jhi-review-update',
@@ -22,7 +24,8 @@ export class ReviewUpdateComponent implements OnInit {
     score: [null, [Validators.required, Validators.min(1), Validators.max(5)]],
   });
 
-  constructor(protected reviewService: ReviewService, protected activatedRoute: ActivatedRoute, protected fb: FormBuilder) {}
+  constructor(protected reviewService: ReviewService, protected activatedRoute: ActivatedRoute, protected fb: FormBuilder,
+              protected modalService: NgbModal) {}
 
   ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ review }) => {
@@ -49,6 +52,18 @@ export class ReviewUpdateComponent implements OnInit {
     }
   }
 
+  delete(): void {
+    const modalRef = this.modalService.open(ReviewDeleteDialogComponent, { size: 'lg', backdrop: 'static' });
+    const review = this.createFromForm()
+    modalRef.componentInstance.review = review;
+    // unsubscribe not needed because closed completes on modal close
+    modalRef.closed.subscribe(reason => {
+      if (reason === 'deleted') {
+        this.previousState();
+      }
+    });
+  }
+
   protected subscribeToSaveResponse(result: Observable<HttpResponse<IReview>>): void {
     result.pipe(finalize(() => this.onSaveFinalize())).subscribe(
       () => this.onSaveSuccess(),
@@ -70,7 +85,7 @@ export class ReviewUpdateComponent implements OnInit {
 
   protected updateForm(review: IReview): void {
     this.editForm.patchValue({
-      id: review.userId,
+      userId: review.userId,
       companyId: review.companyId,
       comment: review.review,
       score: review.score,
